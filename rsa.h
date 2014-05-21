@@ -33,6 +33,23 @@ struct file {
 };
 #pragma pack(0) 
 
+
+/**
+* Structure d'une reponse a un SEARCH
+* */
+struct reponse {
+
+char ip[255];
+
+char  name[255];
+
+char type[255];
+
+char keywords[255];
+
+char hash[255];
+};
+
 char** str_split(char* a_str, const char a_delim);
 char * hashSha1(char * arg);
 

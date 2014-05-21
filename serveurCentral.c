@@ -123,23 +123,21 @@ int main (int argc, char *argv[])
 			/*lire le fichier save.txt
 			 si mot cle alors prendre la ligne
 			Envoi SEARCH_RESP*/
-					FILE *f;
+			FILE *f;
 			int nbligne;
 			system("wc -l save.txt > tmp" );
 			f = fopen("tmp","rw" );
 			fscanf(f,"%d",&nbligne);
 			struct reponse tab_struct[nbligne];
 
-			//lire le fichier save.txt
-			// si mot clé alors prendre la ligne
+			/*lire le fichier save.txt
+			 si mot cle alors prendre la ligne*/
 			fil = fopen("save.txt", "r");
 			if(fil!=NULL)
 			{
 				char * line = NULL;
 				size_t len = 0;
-				ssize_t read;
-								
-				
+				ssize_t read;			
 				int i=0;
 				while((read = getline(&line, &len, fil)) != -1)
 				{
@@ -168,18 +166,17 @@ int main (int argc, char *argv[])
 						i++;
 					  }
 				   }				
-				fclose(fil);
-			}
-			else{
-				if ( (n= sendto (serverSocket, error, strlen(error),0, 
-				(struct sockaddr *)&serv_addr, sizeof(serv_addr)
-					  )) != strlen(error))  {
+				   fclose(fil);
+			    }
+			    else{
+					if ( (n= sendto (serverSocket, error, strlen(error),0, 
+					(struct sockaddr *)&serv_addr, sizeof(serv_addr))) != strlen(error))  {
 					perror ("erreur sendto");
 					exit (1);
 				}
-			}
+			    }
 			
-			//Envoi SEARCH_RESP
+			/*Envoi SEARCH_RESP*/
 			if ( (n= sendto (serverSocket, search, strlen(search),0, 
 			(struct sockaddr *)&serv_addr, sizeof(serv_addr)
 				  )) != strlen(search))  {
@@ -187,7 +184,7 @@ int main (int argc, char *argv[])
 				exit (1);
 			}
 			
-			//Envoi tableau de struct
+			/*Envoi tableau de struct*/
 			if ( (n= sendto (serverSocket, &tab_struct, sizeof(tab_struct),0, 
 				(struct sockaddr *)&serv_addr, len
 			  )) != sizeof(tab_struct))  {
@@ -196,7 +193,7 @@ int main (int argc, char *argv[])
 			}
 			
 		}
-		}
+		
 		/*Sinon on envoie un message d erreur*/
 		else{
 			if ( (n= sendto (serverSocket, error, strlen(error),0, 

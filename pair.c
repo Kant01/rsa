@@ -192,6 +192,14 @@ int main (int argc, char *argv[])
 	}
 	else if(strcmp(sendbuf, "SEARCH_RESP")==0){
 		printf("Résultat de la recherche : %s\n", sendbuf);
+		struct reponse tab_struct[50];
+
+		if ( (n= recvfrom (serverSocket, tab_struct, sizeof(tab_struct)-1,0,
+			(struct sockaddr *)&serv_addr, &len)) < 0 )  {
+				printf ("erreur recvfrom \n");
+				exit (1);
+		}
+		printf("Struct %s \n", tab_struct[0].name);
 	}
 	else{
 		printf("Erreur lors de la requête: %s \n", sendbuf);
