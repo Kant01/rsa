@@ -18,21 +18,20 @@
 #include     <arpa/inet.h>
 #include     <netdb.h>
 #include 	 <unistd.h>
+#include     <stdlib.h>
 
-#include "struct.c"
-#include "utils.c"
-
+#include "rsa.h"
 
 #define MAXLINE 80
-usage(){
+void usage(){
 	printf("usage : cliecho adresseIP_serveur(x.x.x.x)  numero_port_serveur (PUBLISH|SEARCH)\n");
 }
 
-usagePublish(){
+void usagePublish(){
 	printf("usage : cliecho adresseIP_serveur(x.x.x.x)  numero_port_serveur PUBLISH file keyWordList\n");
 }
 
-usageSearch(){
+void usageSearch(){
 	printf("usage : cliecho adresseIP_serveur(x.x.x.x)  numero_port_serveur SEARCH keyWord\n");
 }
 
@@ -45,7 +44,7 @@ int main (int argc, char *argv[])
 
 	int serverSocket, unixSocket,  n, retread;
 	struct sockaddr_in  serv_addr;
-	struct sockaddr_un  unixAddr;
+	/*struct sockaddr_un  unixAddr;*/
 	char *request;
 	char *type;
 	char *word;
@@ -69,7 +68,7 @@ int main (int argc, char *argv[])
 	 */
 	type = argv[3];
 
-	//Si PUBLISH
+	/*Si PUBLISH*/
 	if(strcmp(type, "PUBLISH")==0){
 		if(argc < 6){
 			usagePublish();
@@ -90,7 +89,7 @@ int main (int argc, char *argv[])
 					strcat(f.keywords, "/");
 				}
 				
-				//strcpy(f.keywords, "Test");
+				/*strcpy(f.keywords, "Test");*/
 
 				request = "PUBLISH";
 			}
@@ -100,7 +99,7 @@ int main (int argc, char *argv[])
 			}
 		}
 	}
-	//Si SEARCH
+	/*Si SEARCH*/
 	else if(strcmp(type, "SEARCH")==0){
 		if(argc < 5){
 			usageSearch();
@@ -128,9 +127,9 @@ int main (int argc, char *argv[])
 		fprintf(stderr, "%s: %s non trouve dans in /etc/hosts ou dans le DNS\n", argv[0], argv[1]);
 		exit(1);
 	}
-	//  bcopy( (char *) hp->h_addr,  (char *)& serv_addr.sin_addr, hp->h_length);
-	memcpy( & serv_addr.sin_addr ,  hp->h_addr,  hp->h_length);
-	//printf ("IP address: %s\n", inet_ntoa (serv_addr.sin_addr));
+	/*  bcopy( (char *) hp->h_addr,  (char *)& serv_addr.sin_addr, hp->h_length);*/
+	/*memcpy( & serv_addr.sin_addr ,  hp->h_addr,  hp->h_length);*/
+	/*printf ("IP address: %s\n", inet_ntoa (serv_addr.sin_addr));*/
  
    
 	/*
@@ -200,4 +199,6 @@ int main (int argc, char *argv[])
  
  
  close(serverSocket);
+
+	return 0;
  }

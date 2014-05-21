@@ -8,30 +8,9 @@
  *********************************************************************/
 
 #include     <stdlib.h>
-#include	 <string.h>
+#include	   <string.h>
+#include "rsa.h"
 
-/**
- * Structure d'un fichier qui peut etre envoye
- * 
- * Possede : 
- * 		un nom
- * 		un type
- * 		une liste de mot cles
- * 		le hash du contenu
- * */
-#pragma pack(1)
-struct file {
-	
-	char  name[255];
-	
-	char type[255];
-	
-	char keywords[255];
-	
-	char hash[255];
-	
-};
-#pragma pack(0) 
 
 /**
  * Methode permettant de retourner une structure File sous forme d une 
