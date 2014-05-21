@@ -36,7 +36,7 @@ int main (int argc, char *argv[])
 	struct sockaddr_in  serv_addr;
 	struct sockaddr_un  unixAddr;
 
-	char data[1500];
+	char data[1500],buf[1500];
 	char * ack;
 	char * search;
 	char * error;
@@ -47,7 +47,6 @@ int main (int argc, char *argv[])
 
 	FILE * fil;
   
-   
 	/*
 	* Ouvrir socket UDP
 	*/
@@ -86,8 +85,8 @@ int main (int argc, char *argv[])
 		}
 		
 		data[n]='\0';
-		
-		char ** tokens = str_split(data, '|');
+		strcpy(buf,data);
+		char ** tokens = str_split(buf, '|');
 	 
 		//Si on recoit un PUBLISH
 		if(strcmp((*tokens+0), "PUBLISH")==0)
@@ -114,7 +113,15 @@ int main (int argc, char *argv[])
 		}
 		//Si on recoit un SEARCH
 		else if(strcmp((*tokens+0), "SEARCH")==0){
-			printf("%s\n", (*tokens+2));
+			char *part = (char*)malloc((strlen(data))*sizeof(char));
+		   part = strtok(data,"|");
+			//printf("test=%s\n",part);
+			part = strtok(NULL,"|");
+			//printf("test=%s\n",part);
+
+
+			//lire le fichier save.txt
+			// si mot clé alors prendre la ligne
 			//Envoi SEARCH_RESP
 			if ( (n= sendto (serverSocket, search, strlen(search),0, 
 			(struct sockaddr *)&serv_addr, sizeof(serv_addr)
