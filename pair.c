@@ -144,7 +144,7 @@ int main (int argc, char *argv[])
 	 */
 	if(strcmp(type, "PUBLISH")==0){
 			
-		printf("Message envoyee : %s \n", request);
+		printf("Message envoye : %s \n", request);
 		if ( (n= sendto (serverSocket, request, strlen(request),0, 
 			(struct sockaddr *)&serv_addr, sizeof(serv_addr)
 				  )) != strlen(request))  {
@@ -159,7 +159,14 @@ int main (int argc, char *argv[])
 				exit (1);
 		}
 	}
-	else if(strcmp(type, "REQUEST")==0){
+	else if(strcmp(type, "SEARCH")==0){
+		printf("Message envoye : %s \n", request);
+		if ( (n= sendto (serverSocket, request, strlen(request),0, 
+			(struct sockaddr *)&serv_addr, sizeof(serv_addr)
+				  )) != strlen(request))  {
+				perror ("erreur sendto");
+				exit (1);
+		}
 		
 	}
 	
@@ -178,7 +185,7 @@ int main (int argc, char *argv[])
 		printf("Le fichier a bien été publié : %s\n", sendbuf);
 	}
 	else if(strcmp(sendbuf, "SEARCH_RESP")==0){
-		printf("Resultat de la recherche : %s\n", sendbuf);
+		printf("Résultat de la recherche : %s\n", sendbuf);
 	}
 	else{
 		printf("Erreur lors de la requête: %s \n", sendbuf);

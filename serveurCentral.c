@@ -114,8 +114,8 @@ int main (int argc, char *argv[])
 		}
 		//Si on recoit un SEARCH
 		else if(strcmp((*tokens+0), "SEARCH")==0){
-			
-			//Envoie SEARCH_RESP
+			printf("%s\n", (*tokens+2));
+			//Envoi SEARCH_RESP
 			if ( (n= sendto (serverSocket, search, strlen(search),0, 
 			(struct sockaddr *)&serv_addr, sizeof(serv_addr)
 				  )) != strlen(search))  {
