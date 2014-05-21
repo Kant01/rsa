@@ -104,7 +104,7 @@ int main (int argc, char *argv[])
 			fprintf(fil,"%s",stringFile(f, inet_ntoa(serv_addr.sin_addr)));
 			fclose(fil);
 			
-			//Envoie PUBLISH_ACK
+			//Envoi PUBLISH_ACK
 			if ( (n= sendto (serverSocket, ack, strlen(ack),0, 
 			(struct sockaddr *)&serv_addr, sizeof(serv_addr)
 				  )) != strlen(ack))  {

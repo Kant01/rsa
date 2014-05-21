@@ -29,7 +29,7 @@ usage(){
 }
 
 usagePublish(){
-	printf("usage : cliecho adresseIP_serveur(x.x.x.x)  numero_port_serveur PUBLISH file \n");
+	printf("usage : cliecho adresseIP_serveur(x.x.x.x)  numero_port_serveur PUBLISH file keyWordList\n");
 }
 
 usageSearch(){
@@ -71,7 +71,7 @@ int main (int argc, char *argv[])
 
 	//Si PUBLISH
 	if(strcmp(type, "PUBLISH")==0){
-		if(argc < 5){
+		if(argc < 6){
 			usagePublish();
 			exit(1);
 		}
@@ -82,7 +82,15 @@ int main (int argc, char *argv[])
 				strcpy(f.name , argv[4]);
 				strtok(argv[4], ".");
 				strcpy(f.type, strtok(NULL, "."));
-				strcpy(f.keywords, "Test");
+				
+				int i;
+				for(i = 5; i < argc; i++)
+				{
+					strcat(f.keywords, argv[i]);
+					strcat(f.keywords, "/");
+				}
+				
+				//strcpy(f.keywords, "Test");
 
 				request = "PUBLISH";
 			}
@@ -167,7 +175,6 @@ int main (int argc, char *argv[])
 				perror ("erreur sendto");
 				exit (1);
 		}
-		
 	}
 	
 	/*
