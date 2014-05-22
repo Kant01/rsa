@@ -32,15 +32,13 @@
 int main (int argc, char *argv[])
 {
 
-	int serverSocket, unixSocket,  n, retread;
+	int serverSocket,  n;
 	struct sockaddr_in  serv_addr;
-	struct sockaddr_un  unixAddr;
 
 	char data[1500],buf[1500];
 	char * ack;
 	char * search;
-	char * error;
-	struct hostent *hp;  
+	char * error; 
 	int ttl;	
 	socklen_t len=sizeof(serv_addr);
 	struct file f;
@@ -141,7 +139,6 @@ int main (int argc, char *argv[])
 				int i=0;
 				while((read = getline(&line, &len, fil)) != -1)
 				{
-					printf("%s \n", line);
 					
 					char * nom = malloc(sizeof(line));
 					char * tp = malloc(sizeof(line));
@@ -153,8 +150,8 @@ int main (int argc, char *argv[])
 					{						
 						nom = strtok(line, "|");
 						tp = strtok(NULL, "|");
-						words = strtok(NULL, "|");
 						hash = strtok(NULL, "|");
+						words = strtok(NULL, "|");
 						ip = strtok(NULL, "|");
 						
 						strcpy(tab_struct[i].ip, ip);
@@ -162,9 +159,14 @@ int main (int argc, char *argv[])
 						strcpy(tab_struct[i].type, tp);
 						strcpy(tab_struct[i].hash, hash);
 						strcpy(tab_struct[i].keywords, words);
-									
+
 						i++;
 					  }
+					  strcpy(tab_struct[i].ip, "");
+					  strcpy(tab_struct[i].name, "");
+					  strcpy(tab_struct[i].type , "");
+					  strcpy(tab_struct[i].hash , "");
+					  strcpy(tab_struct[i].keywords , "");
 				   }				
 				   fclose(fil);
 			    }

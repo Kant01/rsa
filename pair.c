@@ -19,10 +19,23 @@
 #include     <netdb.h>
 #include 	 <unistd.h>
 #include     <stdlib.h>
+#include <stdio.h> 
+#include <sys/time.h>
+
+#include <errno.h>
+#include <string.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+
+#include  <fcntl.h>
+
+#include <string.h>
 
 #include "rsa.h"
 
 #define MAXLINE 80
+#define LENGTH 512
+
 void usage(){
 	printf("usage : cliecho adresseIP_serveur(x.x.x.x)  numero_port_serveur (PUBLISH|SEARCH)\n");
 }
@@ -42,7 +55,7 @@ void usageSearch(){
 int main (int argc, char *argv[])
 {
 
-	int serverSocket, unixSocket,  n, retread;
+	int serverSocket, n;
 	struct sockaddr_in  serv_addr;
 	/*struct sockaddr_un  unixAddr;*/
 	char *request;
@@ -151,7 +164,7 @@ int main (int argc, char *argv[])
 	 */
 	if(strcmp(type, "PUBLISH")==0){
 			
-		printf("Message envoye : %s \n", request);
+		printf("[Message] Envoie : %s \n", request);
 		if ( (n= sendto (serverSocket, request, strlen(request),0, 
 			(struct sockaddr *)&serv_addr, sizeof(serv_addr)
 				  )) != strlen(request))  {
@@ -167,7 +180,7 @@ int main (int argc, char *argv[])
 		}
 	}
 	else if(strcmp(type, "SEARCH")==0){
-		printf("Message envoye : %s \n", request);
+		printf("[Message] Envoie : %s \n", request);
 		if ( (n= sendto (serverSocket, request, strlen(request),0, 
 			(struct sockaddr *)&serv_addr, sizeof(serv_addr)
 				  )) != strlen(request))  {
@@ -183,30 +196,149 @@ int main (int argc, char *argv[])
 		(struct sockaddr *)&serv_addr, &len)) < 0 )  {
 			printf ("erreur recvfrom : %s\n", sendbuf);
 			exit (1);
-	} 
+	}
 
 	sendbuf[n]='\0';
 
 	if(strcmp(sendbuf, "PUBLISH_ACK")==0){
-		printf("Le fichier a bien été publié : %s\n", sendbuf);
+		printf("[Message] Le fichier a bien été publié : %s \n", sendbuf);
 	}
 	else if(strcmp(sendbuf, "SEARCH_RESP")==0){
-		printf("Résultat de la recherche : %s\n", sendbuf);
+		printf("[Message] Résultat de la recherche : %s \n", sendbuf);
 		struct reponse tab_struct[50];
 
+		/* Reception des structures correspondant a la recherche */
 		if ( (n= recvfrom (serverSocket, tab_struct, sizeof(tab_struct)-1,0,
 			(struct sockaddr *)&serv_addr, &len)) < 0 )  {
 				printf ("erreur recvfrom \n");
 				exit (1);
 		}
-		printf("Struct %s \n", tab_struct[0].name);
+		
+		/* 
+		 * Envoyer requete vers serveur
+		 * 	Si il a le fichier -> le recevoir
+		 *  Sinon dire qu il ne l a pas 
+		 * 			chercher sur un autre 
+		 * */
+		 int i = 0;
+		 int res = -1;
+		 while( (strcmp(tab_struct[i].hash, "") != 0) && res != 0)
+		 {
+			printf("[Message] Tentative de récupération du fichier sur l hote n° %i \n", i);
+			res = recuperationFichier( tab_struct[i].ip, tab_struct[i]);
+			
+			if(res == 2)
+			{
+				printf("[Message] Echec de la récupération. Fichier introuvable \n");
+			}
+			
+			i++;
+		 }
+		 
+		 if(res == -1)
+		 {
+			 printf("[Message] Aucun fichier correspondant à la recherche. \n");
+		 }
+		 
+		
 	}
 	else{
-		printf("Erreur lors de la requête: %s \n", sendbuf);
+		printf("[Message] Erreur lors de la requête: %s \n", sendbuf);
 	}
  
  
- close(serverSocket);
+	close(serverSocket);
 
 	return 0;
  }
+ 
+ 
+/*
+ * Methode permettant 
+ * */
+int recuperationFichier(char * ip, struct reponse rep)
+{
+
+	int serverSocket;
+	struct sockaddr_in  serv_addr; 
+	char fileExiste[5];
+	char buffer[LENGTH];
+	int value = 1;
+	  
+  
+	/* Ouvrir socket (socket STREAM)
+	*/
+	if ((serverSocket = socket(PF_INET, SOCK_STREAM, 0)) <0) {
+		perror ("[ERROR] Failed to obtain Socket Descriptor \n");
+		return 1;
+	}
+
+	memset ( (char *) &serv_addr, 0, sizeof(serv_addr) );
+	serv_addr.sin_family = AF_INET;
+	serv_addr.sin_port = htons(2223);
+	serv_addr.sin_addr.s_addr = inet_addr(ip);
+	
+	/* Connect to the serveur 
+	*/
+	if (connect (serverSocket, (struct sockaddr *) &serv_addr,  
+		sizeof(serv_addr) ) < 0){
+			perror ("[ERROR] Failed to connect to the host \n");
+			return 1;
+	}
+	else{
+		printf("[Message] Connected to server\n");
+	}
+	
+	int on=1;
+	setsockopt(serverSocket, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on));
+	
+	write(serverSocket, rep.name, sizeof(rep.name));
+	
+	int i = read(serverSocket, fileExiste, sizeof(fileExiste));
+	fileExiste[i] = '\0';
+	
+	if(strcmp(fileExiste, "OK") == 0)
+	{
+		printf("[Message] Fichier trouvé \n");
+		printf("[Message] Début transmission \n");
+		
+		FILE *f = fopen ( rep.name, "wb" );
+		if(f != NULL)
+		{
+			int tab[256];
+			
+			while(read(serverSocket, tab, sizeof(tab))!= NULL)
+			{
+				write(f, tab, sizeof(tab));
+			}
+			fclose(f);
+			printf("[Message] Fin transmission \n");
+		}
+		
+		printf("[Message] Verification du contenu \n");
+		
+		if(strcmp(hashSha1(rep.name), rep.hash) == 0)
+		{
+			printf("[Message] Contenu identique \n");
+			
+		}
+		else{
+			printf("[Message] Contenu différent : Suppression du fichier téléchargé \n");
+			/*remove(rep.name);*/
+			return 3;
+		}
+	}
+	else
+	{
+		printf("[Message] Fichier non exisant \n");
+		close(serverSocket);
+		return 2;
+	}
+	
+	close (serverSocket);
+    printf("[Message] Connection closed.\n");
+    return 0;
+
+}
+
+ 
