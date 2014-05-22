@@ -81,6 +81,7 @@ int main (int argc, char *argv[])
 	 */
 	type = argv[3];
 
+
 	/*Si PUBLISH*/
 	if(strcmp(type, "PUBLISH")==0){
 		if(argc < 6){
@@ -125,7 +126,9 @@ int main (int argc, char *argv[])
 			strcat(request, word);
 		}
 	}
-
+	else{
+		exit(1);
+	}
 
 	/* 
 	* Remplir la structure  serv_addr avec l'adresse du serveur 
@@ -224,7 +227,7 @@ int main (int argc, char *argv[])
 		 int res = -1;
 		 while( (strcmp(tab_struct[i].hash, "") != 0) && res != 0)
 		 {
-			printf("[Message] Tentative de récupération du fichier sur l hote n° %i \n", i);
+			printf("[Message] Tentative de récupération du fichier sur l hote n° %i \n", i+1);
 			res = recuperationFichier( tab_struct[i].ip, tab_struct[i]);
 			
 			if(res == 2)
@@ -238,6 +241,10 @@ int main (int argc, char *argv[])
 		 if(res == -1)
 		 {
 			 printf("[Message] Aucun fichier correspondant à la recherche. \n");
+		 }
+		 else if(res == 0)
+		 {
+			 printf("[Message] Aucun fichier corrspondant à la recherche \n");
 		 }
 		 
 		
@@ -261,8 +268,7 @@ int recuperationFichier(char * ip, struct reponse rep)
 
 	int serverSocket;
 	struct sockaddr_in  serv_addr; 
-	char fileExiste[5];
-	char buffer[LENGTH];
+	char fileExiste[2];
 	int value = 1;
 	  
   
@@ -295,21 +301,24 @@ int recuperationFichier(char * ip, struct reponse rep)
 	write(serverSocket, rep.name, sizeof(rep.name));
 	
 	int i = read(serverSocket, fileExiste, sizeof(fileExiste));
-	fileExiste[i] = '\0';
+	
+	printf("RESULTAT : %s \n", fileExiste);
 	
 	if(strcmp(fileExiste, "OK") == 0)
 	{
 		printf("[Message] Fichier trouvé \n");
 		printf("[Message] Début transmission \n");
 		
-		FILE *f = fopen ( rep.name, "wb" );
+		FILE *f = fopen ( rep.name, "w+" );
 		if(f != NULL)
 		{
-			int tab[256];
-			
-			while(read(serverSocket, tab, sizeof(tab))!= NULL)
+			char tab[100];
+			int n;
+			while( (n=read(serverSocket, tab, 256)) >0)
 			{
-				write(f, tab, sizeof(tab));
+				printf("Chaine recue (%d) : %s \n", n, tab);
+				fwrite( tab, 1, n, f);
+				
 			}
 			fclose(f);
 			printf("[Message] Fin transmission \n");
@@ -317,6 +326,9 @@ int recuperationFichier(char * ip, struct reponse rep)
 		
 		printf("[Message] Verification du contenu \n");
 		
+		printf("%s \n", rep.name);
+		printf("%s \n", hashSha1(rep.name));
+		printf("%s \n", rep.hash);
 		if(strcmp(hashSha1(rep.name), rep.hash) == 0)
 		{
 			printf("[Message] Contenu identique \n");

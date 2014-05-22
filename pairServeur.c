@@ -35,9 +35,9 @@
 int main (int argc, char *argv[])
 {
 	struct sockaddr_in serv_addr;
-	//Socket de connexion
+	/*Socket de connexion*/
 	int serverSocket;
-	//Socket de dialogue
+	/*Socket de dialogue*/
 	int dialogSocket;
 	int clilen;
 	struct sockaddr_in cli_addr;
@@ -83,36 +83,43 @@ int main (int argc, char *argv[])
 	*/
 	clilen = sizeof(cli_addr);
 
+	char * request;
 
+	char buf[100];
+	char line[100];
+	FILE *f ;
 	for(;;)
 	{
 		dialogSocket = accept(serverSocket, (struct sockaddr *)&cli_addr, (socklen_t *)&clilen);
 		if( dialogSocket < 0)
 		{
-			perror("servecho: erreur accept \n");
+			perror("servecho: erreur accept");
 			exit(1);
 		}
 
-		char buf[100];
 		read(dialogSocket, buf, sizeof(buf));
 		
-		//Si le fichier existe
+		printf("Fichier demandé %s \n", buf);
+		
+		/*Si le fichier existe*/
 		if( access( buf, F_OK ) != -1 ) {
 			
-			write(dialogSocket, "OK", 2);
-		
-			FILE *f = fopen ( buf, "r" );
+			request = "OK";
+			write(dialogSocket, request, strlen(request));
+			
+			f = fopen ( buf, "rb" );
 			if(f != NULL)
 			{
-				char line[256];
 				
-				while(fgets(line, sizeof(line), f) != NULL)
+				int n;
+				while((n = fread(line, 1, sizeof(line), f)) > 0)
 				{
-					write(dialogSocket, line, sizeof(line));
+					write(dialogSocket, line, n);
+					printf("Chaine envoyée : %s \n", line);
 				}
 				
-				close(dialogSocket);
 				fclose(f);
+				close(dialogSocket);
 			}
 			else
 			{
@@ -121,12 +128,9 @@ int main (int argc, char *argv[])
 		}
 		else
 		{
-			write(dialogSocket, "NONE", 4);
+			request = "NO";
+			write(dialogSocket, request, strlen(request));
 		}
 	}
-	
-	
-	
-	close(dialogSocket);
 	return 0;
 }
