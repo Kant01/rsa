@@ -269,7 +269,6 @@ int recuperationFichier(char * ip, struct reponse rep)
 	int serverSocket;
 	struct sockaddr_in  serv_addr; 
 	char fileExiste[2];
-	int value = 1;
 	  
   
 	/* Ouvrir socket (socket STREAM)
@@ -300,7 +299,7 @@ int recuperationFichier(char * ip, struct reponse rep)
 	
 	write(serverSocket, rep.name, sizeof(rep.name));
 	
-	int i = read(serverSocket, fileExiste, sizeof(fileExiste));
+	read(serverSocket, fileExiste, sizeof(fileExiste));
 	
 	printf("RESULTAT : %s \n", fileExiste);
 	
@@ -309,7 +308,7 @@ int recuperationFichier(char * ip, struct reponse rep)
 		printf("[Message] Fichier trouvé \n");
 		printf("[Message] Début transmission \n");
 		
-		FILE *f = fopen ( rep.name, "w+" );
+		FILE *f = fopen ( rep.name, "wb+" );
 		if(f != NULL)
 		{
 			char tab[100];
@@ -326,9 +325,6 @@ int recuperationFichier(char * ip, struct reponse rep)
 		
 		printf("[Message] Verification du contenu \n");
 		
-		printf("%s \n", rep.name);
-		printf("%s \n", hashSha1(rep.name));
-		printf("%s \n", rep.hash);
 		if(strcmp(hashSha1(rep.name), rep.hash) == 0)
 		{
 			printf("[Message] Contenu identique \n");

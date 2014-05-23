@@ -112,7 +112,7 @@ int main (int argc, char *argv[])
 		/*Si on recoit un SEARCH*/
 		else if(strcmp((*tokens+0), "SEARCH")==0){
 			char *part = (char*)malloc((strlen(data))*sizeof(char));
-		   part = strtok(data,"|");
+			part = strtok(data,"|");
 			/*printf("test=%s\n",part);*/
 			part = strtok(NULL,"|");
 			/*printf("test=%s\n",part);*/

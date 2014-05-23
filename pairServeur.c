@@ -115,7 +115,6 @@ int main (int argc, char *argv[])
 				while((n = fread(line, 1, sizeof(line), f)) > 0)
 				{
 					write(dialogSocket, line, n);
-					printf("Chaine envoyée : %s \n", line);
 				}
 				
 				fclose(f);
